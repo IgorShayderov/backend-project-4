@@ -1,9 +1,19 @@
-const pageLoader = (url, options = {}) => {
-  const pageURL = new URL(url);
+import axios from 'axios';
+import fs from 'fs/promises';
+import path from 'path';
 
-  // console.log({ pageURL });
+const pageLoader = async (url, options = {}) => {
+  try {
+    const pageURL = new URL(url);
+    const { data } = await axios.get(pageURL);
 
-  `${pageURL.host}${pageURL.pathname}`;
+    const fileName = `${pageURL.host}${pageURL.pathname}`.replace(/[^\w]+/g, '-');
+    const outputDir = options.output ?? process.cwd();
+
+    await fs.writeFile(path.join(outputDir, `${fileName}.html`), data);
+  } catch (e) {
+    console.error({ e }, 'error');
+  }
 };
 
 export default pageLoader;

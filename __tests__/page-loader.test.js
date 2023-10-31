@@ -5,26 +5,31 @@ import os from 'os';
 
 import pageLoader from '../src/index.js';
 
-describe('Page loader acceptance', () => {
-  const testURL = 'https://test.ru/test';
-  let tmpdirPath = null;
+const fixturePath = './__fixtures__/test-page.html';
 
-  beforeAll(() => {
+describe('Page loader acceptance', () => {
+  const testURL = 'https://test.ru/test-file';
+  let tmpdirPath = null;
+  let htmlFixture = null;
+
+  beforeAll(async () => {
+    htmlFixture = await fs.readFile(fixturePath);
+
     nock(new URL(testURL).origin)
       .get(new URL(testURL).pathname)
-      .reply(200, {
-        // html
-      });
+      .reply(200, htmlFixture);
   });
 
   beforeEach(async () => {
-    pageLoader(testURL);
-
     tmpdirPath = await fs.mkdtemp(path.join(os.tmpdir(), 'page-loader-'));
+
+    await pageLoader(testURL, {
+      output: tmpdirPath,
+    });
   });
 
   test('loads file', async () => {
-    const expected = 'file.html';
+    const expected = 'test-ru-test-file.html';
 
     const result = await fs.readdir(tmpdirPath);
 
