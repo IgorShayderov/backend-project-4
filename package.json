@@ -4,8 +4,8 @@
   "description": "Page loader utility",
   "main": "index.js",
   "scripts": {
-    "test": "jest --bail",
-    "test-coverage": "jest --coverage",
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest --bail",
+    "test-coverage": "NODE_OPTIONS=--experimental-vm-modules jest --coverage",
     "lint": "eslint ."
   },
   "bin": {
