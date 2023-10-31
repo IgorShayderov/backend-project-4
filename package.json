@@ -4,7 +4,9 @@
   "description": "Page loader utility",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest --bail",
+    "test-coverage": "jest --coverage",
+    "lint": "eslint ."
   },
   "bin": {
     "page-loader": "./bin/page-loader.js"

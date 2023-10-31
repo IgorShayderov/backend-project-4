@@ -4,9 +4,16 @@ jobs:
   checking:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: installation
         run: npm ci
 
       - name: lint
-        run: npx eslint .
+        run: npm run lint
+
+      - name: test-coverage
+        uses: paambaati/codeclimate-action@v5
+        env:
+          CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+        with:
+          coverageCommand: npm run test-coverage
