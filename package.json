@@ -2,7 +2,7 @@
   "name": "@hexlet/codegi",
   "version": "1.0.0",
   "description": "Page loader utility",
-  "main": "index.js",
+  "main": "src/index.js",
   "scripts": {
     "test": "NODE_OPTIONS=--experimental-vm-modules jest --bail",
     "test-coverage": "NODE_OPTIONS=--experimental-vm-modules jest --coverage",
