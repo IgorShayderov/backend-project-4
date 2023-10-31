@@ -1,0 +1,12 @@
+name: project-check
+on: push
+jobs:
+  checking:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: installation
+        run: npm ci
+
+      - name: lint
+        run: npx eslint .
