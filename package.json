@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "test": "NODE_OPTIONS=--experimental-vm-modules jest --bail",
-    "test-coverage": "NODE_OPTIONS=--experimental-vm-modules jest --coverage",
+    "test-coverage": "npm run test -- --coverage",
     "lint": "eslint ."
   },
   "bin": {

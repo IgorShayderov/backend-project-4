@@ -1,17 +1,18 @@
 #!/usr/bin/env node
 
 import { Command } from 'commander';
-import hz from '../src/index.js';
+import pageLoader from '../src/index.js';
 
 const program = new Command();
 
 program
   .name('page-loader')
-  .description('Utility to load pages')
+  .description('Page loader utility')
   .version('1.0.0')
   .argument('url')
-  .option('-o, --output <folder>', 'output folder')
+  .option('-o, --output [dir]', 'output directory')
   .action((url, options) => {
-    hz(url, options);
-    console.log({ url }, { options });
+    pageLoader(url, options);
   });
+
+program.parse();
