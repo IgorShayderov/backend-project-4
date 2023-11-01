@@ -17,3 +17,19 @@
 # Page loader
 
 Page loader is simple project which allows user to simply fetch any web-page.
+
+#### System requirements
+
+1. Node.js v18
+
+#### Installation instruction
+
+1. Clone repository
+2. run `npm ci` in terminal to install dependencies
+3. link bin file trough `npm link` command
+
+Now you can use utility!
+
+#### Example
+
+[![asciicast](https://asciinema.org/a/RlYXJ7ogXos3EEVHLVBVKy12z.svg)](https://asciinema.org/a/RlYXJ7ogXos3EEVHLVBVKy12z)
