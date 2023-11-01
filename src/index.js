@@ -3,17 +3,20 @@ import fs from 'fs/promises';
 import path from 'path';
 
 const pageLoader = async (url, options = {}) => {
-  try {
-    const pageURL = new URL(url);
-    const { data } = await axios.get(pageURL);
+  const pageURL = new URL(url);
 
-    const fileName = `${pageURL.host}${pageURL.pathname}`.replace(/[^\w]+/g, '-');
-    const outputDir = options.output ?? process.cwd();
+  new Promise((resolve) => {
+    resolve(axios.get(pageURL));
+  })
+    .then(({ data }) => {
+      const fileName = `${pageURL.host}${pageURL.pathname}`.replace(/[^\w]+/g, '-');
+      const outputDir = options.output ?? process.cwd();
 
-    await fs.writeFile(path.join(outputDir, `${fileName}.html`), data);
-  } catch (e) {
-    console.error({ e });
-  }
+      return fs.writeFile(path.join(outputDir, `${fileName}.html`), data);
+    })
+    .catch((e) => {
+      console.error({ e });
+    });
 };
 
 export default pageLoader;
