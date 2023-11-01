@@ -18,9 +18,7 @@ describe('Page loader acceptance', () => {
     nock(new URL(testURL).origin)
       .get(new URL(testURL).pathname)
       .reply(200, htmlFixture);
-  });
 
-  beforeEach(async () => {
     tmpdirPath = await fs.mkdtemp(path.join(os.tmpdir(), 'page-loader-'));
 
     await pageLoader(testURL, {
@@ -28,10 +26,27 @@ describe('Page loader acceptance', () => {
     });
   });
 
-  test('loads file', async () => {
+  test('loads html page', async () => {
     const expected = 'test-ru-test-file.html';
 
     const result = await fs.readdir(tmpdirPath);
+
+    expect(result).toContain(expected);
+  });
+
+  test('has directory for resources', async () => {
+    const expected = 'test-ru-test-file_files';
+
+    const result = await fs.readdir(tmpdirPath);
+
+    expect(result).toContain(expected);
+  });
+
+  test('creates images for page', async () => {
+    const dir = `${tmpdirPath}/test-ru-test-file_files`;
+    const expected = 'ru-hexlet-io-assets-professions-nodejs.png';
+
+    const result = await fs.readdir(dir);
 
     expect(result).toContain(expected);
   });

@@ -12,7 +12,7 @@ const pageLoader = async (url, options = {}) => {
 
     await fs.writeFile(path.join(outputDir, `${fileName}.html`), data);
   } catch (e) {
-    console.error({ e }, 'error');
+    console.error({ e });
   }
 };
 
