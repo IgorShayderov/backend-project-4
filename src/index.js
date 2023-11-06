@@ -24,18 +24,17 @@ const pageLoader = async (url, options = {}) => {
   })
     .then(({ data }) => {
       const $data = cheerio.load(data);
-
-      return fs.writeFile(path.join(outputDir, `${fileName}.html`), data)
-        .then(() => $data);
-    })
-    .then(($data) => {
       const $images = $data('img');
       const imagesUrls = $images
         .map((index, image) => $data(image).attr('src'))
         .toArray();
 
-      $images.attr('src', (index, imageUrl) => transformAssetUrl(imageUrl));
+      $images.prop('src', (index, imageUrl) => transformAssetUrl(imageUrl));
 
+      return fs.writeFile(path.join(outputDir, `${fileName}.html`), $data.html())
+        .then(() => imagesUrls);
+    })
+    .then((imagesUrls) => {
       const filesDirname = path.join(outputDir, `${fileName}_files`);
 
       return fs.readdir(filesDirname)
