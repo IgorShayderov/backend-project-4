@@ -3,18 +3,21 @@ import fs from 'fs/promises';
 import path from 'path';
 import * as cheerio from 'cheerio';
 
-// найти ссылки в html
-// создать директорию для файлов
-// скачать изображения
-// поменять названия изображениям
-// поправить тесты
-
 const tranformFilename = (filename) => filename.replace(/[^\w]+/g, '-');
 
 const pageLoader = async (url, options = {}) => {
   const pageURL = new URL(url);
   const fileName = tranformFilename(`${pageURL.host}${pageURL.pathname}`);
   const outputDir = options.output ?? process.cwd();
+
+  const transformAssetUrl = (assetUrl) => {
+    const [, noFormatUrl, format] = assetUrl.match(/(^[A-Za-z/:.0-9-]+)\.(\w+)/);
+    const transformedUrl = tranformFilename(`${pageURL.host}${noFormatUrl}`);
+
+    const imagePath = path.join(outputDir, `${fileName}_files`, `${transformedUrl}.${format}`);
+
+    return imagePath;
+  };
 
   new Promise((resolve) => {
     resolve(axios.get(pageURL));
@@ -31,11 +34,7 @@ const pageLoader = async (url, options = {}) => {
         .map((index, image) => $data(image).attr('src'))
         .toArray();
 
-      $images.attr('src', (index, attr) => {
-        console.log({ attr });
-
-        return '';
-      });
+      $images.attr('src', (index, imageUrl) => transformAssetUrl(imageUrl));
 
       const filesDirname = path.join(outputDir, `${fileName}_files`);
 
@@ -47,14 +46,7 @@ const pageLoader = async (url, options = {}) => {
       imagesUrls.map((imageUrl) => axios.get(imageUrl, {
         responseType: 'arraybuffer',
       })
-        .then((response) => {
-          const [, noFormatUrl, format] = imageUrl.match(/(^[A-Za-z/:.0-9-]+)\.(\w+)/);
-          const transformedUrl = tranformFilename(`${pageURL.host}${noFormatUrl}`);
-
-          const imagePath = path.join(outputDir, `${fileName}_files`, `${transformedUrl}.${format}`);
-
-          return fs.writeFile(imagePath, response.data);
-        })),
+        .then((response) => fs.writeFile(transformAssetUrl(imageUrl), response.data))),
     ]))
     .catch((e) => {
       console.error({ e });
