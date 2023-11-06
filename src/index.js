@@ -19,12 +19,15 @@ const pageLoader = async (url, options = {}) => {
     return imagePath;
   };
 
-  new Promise((resolve) => {
-    resolve(axios.get(pageURL));
+  return new Promise((resolve) => {
+    resolve(
+      axios.get(pageURL),
+    );
   })
     .then(({ data }) => {
       const $data = cheerio.load(data);
       const $images = $data('img');
+
       const imagesUrls = $images
         .map((index, image) => $data(image).attr('src'))
         .toArray();
@@ -32,21 +35,21 @@ const pageLoader = async (url, options = {}) => {
       $images.prop('src', (index, imageUrl) => transformAssetUrl(imageUrl));
 
       return fs.writeFile(path.join(outputDir, `${fileName}.html`), $data.html())
-        .then(() => imagesUrls);
+        .then(() => Promise.resolve(imagesUrls));
     })
     .then((imagesUrls) => {
       const filesDirname = path.join(outputDir, `${fileName}_files`);
 
       return fs.readdir(filesDirname)
-        .then(() => Promise.resolve(), () => fs.mkdir(filesDirname))
-        .then(() => imagesUrls);
+        .then(() => Promise.resolve([]), () => fs.mkdir(filesDirname))
+        .then(() => Promise.resolve(imagesUrls));
     })
-    .then((imagesUrls) => Promise.allSettled([
+    .then((imagesUrls) => Promise.allSettled(
       imagesUrls.map((imageUrl) => axios.get(imageUrl, {
         responseType: 'arraybuffer',
       })
         .then((response) => fs.writeFile(transformAssetUrl(imageUrl), response.data))),
-    ]))
+    ))
     .catch((e) => {
       console.error({ e });
     });

@@ -5,19 +5,24 @@ import os from 'os';
 
 import pageLoader from '../src/index.js';
 
-const fixturePath = './__fixtures__/test-page.html';
+const pageFixturePath = './__fixtures__/test-page.html';
+const imageFixturePath = './__fixtures__/nodejs.png';
 
 describe('Page loader acceptance', () => {
   const testURL = 'https://test.ru/test-file';
   let tmpdirPath = null;
-  let htmlFixture = null;
 
   beforeAll(async () => {
-    htmlFixture = await fs.readFile(fixturePath);
+    const htmlFixture = await fs.readFile(pageFixturePath);
+    const imageFixture = await fs.readFile(imageFixturePath);
 
     nock(new URL(testURL).origin)
       .get(new URL(testURL).pathname)
       .reply(200, htmlFixture);
+
+    nock('https://cdn2.hexlet.io')
+      .get('/assets/nodejs.png')
+      .reply(200, imageFixture);
 
     tmpdirPath = await fs.mkdtemp(path.join(os.tmpdir(), 'page-loader-'));
 
@@ -34,7 +39,7 @@ describe('Page loader acceptance', () => {
     expect(result).toContain(expected);
   });
 
-  test.skip('has directory for resources', async () => {
+  test('has directory for resources', async () => {
     const expected = 'test-ru-test-file_files';
 
     const result = await fs.readdir(tmpdirPath);
@@ -42,9 +47,9 @@ describe('Page loader acceptance', () => {
     expect(result).toContain(expected);
   });
 
-  test.skip('creates images for page', async () => {
+  test('creates images for page', async () => {
     const dir = `${tmpdirPath}/test-ru-test-file_files`;
-    const expected = 'ru-hexlet-io-assets-professions-nodejs.png';
+    const expected = 'test-ruhttps-cdn2-hexlet-io-assets-nodejs.png';
 
     const result = await fs.readdir(dir);
 
