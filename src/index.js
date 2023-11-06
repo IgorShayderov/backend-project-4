@@ -5,19 +5,17 @@ import * as cheerio from 'cheerio';
 
 const tranformFilename = (filename) => filename.replace(/[^\w]+/g, '-');
 
+const transformAssetUrl = (pageURL, assetUrl) => {
+  const [, noFormatUrl, format] = assetUrl.match(/(^[A-Za-z/:.0-9-]+)\.(\w+)/);
+  const transformedUrl = tranformFilename(`${pageURL.host}${noFormatUrl}`);
+
+  return `${transformedUrl}.${format}`;
+};
+
 const pageLoader = async (url, options = {}) => {
   const pageURL = new URL(url);
   const fileName = tranformFilename(`${pageURL.host}${pageURL.pathname}`);
   const outputDir = options.output ?? process.cwd();
-
-  const transformAssetUrl = (assetUrl) => {
-    const [, noFormatUrl, format] = assetUrl.match(/(^[A-Za-z/:.0-9-]+)\.(\w+)/);
-    const transformedUrl = tranformFilename(`${pageURL.host}${noFormatUrl}`);
-
-    const imagePath = path.join(outputDir, `${fileName}_files`, `${transformedUrl}.${format}`);
-
-    return imagePath;
-  };
 
   return new Promise((resolve) => {
     resolve(
@@ -32,7 +30,11 @@ const pageLoader = async (url, options = {}) => {
         .map((index, image) => $data(image).attr('src'))
         .toArray();
 
-      $images.prop('src', (index, imageUrl) => transformAssetUrl(imageUrl));
+      $images.prop('src', (index, imageUrl) => {
+        const assetSrc = transformAssetUrl(pageURL, imageUrl);
+
+        return path.join(outputDir, `${fileName}_files`, assetSrc);
+      });
 
       return fs.writeFile(path.join(outputDir, `${fileName}.html`), $data.html())
         .then(() => Promise.resolve(imagesUrls));
@@ -48,7 +50,11 @@ const pageLoader = async (url, options = {}) => {
       imagesUrls.map((imageUrl) => axios.get(imageUrl, {
         responseType: 'arraybuffer',
       })
-        .then((response) => fs.writeFile(transformAssetUrl(imageUrl), response.data))),
+        .then((response) => {
+          const assetSrc = transformAssetUrl(pageURL, imageUrl);
+
+          return fs.writeFile(path.join(outputDir, `${fileName}_files`, assetSrc), response.data);
+        })),
     ))
     .catch((e) => {
       console.error({ e });
