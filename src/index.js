@@ -44,9 +44,16 @@ const pageLoader = async (url, options = {}) => {
         .then(() => imagesUrls);
     })
     .then((imagesUrls) => Promise.allSettled([
-      imagesUrls.map((imageSrc) => axios.get(imageSrc)
-        .then((image) => {
-          // fs.writeFile();
+      imagesUrls.map((imageUrl) => axios.get(imageUrl, {
+        responseType: 'arraybuffer',
+      })
+        .then((response) => {
+          const [, noFormatUrl, format] = imageUrl.match(/(^[A-Za-z/:.0-9-]+)\.(\w+)/);
+          const transformedUrl = tranformFilename(`${pageURL.host}${noFormatUrl}`);
+
+          const imagePath = path.join(outputDir, `${fileName}_files`, `${transformedUrl}.${format}`);
+
+          return fs.writeFile(imagePath, response.data);
         })),
     ]))
     .catch((e) => {
