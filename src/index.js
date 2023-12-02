@@ -12,8 +12,8 @@ const transformAssetUrl = (pageURL, assetUrl) => {
   return `${transformedUrl}.${format}`;
 };
 
-const pageLoader = async (url, options = {}) => {
-  const pageURL = new URL(url);
+const pageLoader = async (sourceUrl, options = {}) => {
+  const pageURL = new URL(sourceUrl);
   const fileName = tranformFilename(`${pageURL.host}${pageURL.pathname}`);
   const outputDir = options.output ?? process.cwd();
 
@@ -25,10 +25,18 @@ const pageLoader = async (url, options = {}) => {
     .then(({ data }) => {
       const $data = cheerio.load(data);
       const $images = $data('img');
+      const $scripts = $data('script');
 
-      const imagesUrls = $images
-        .map((_, image) => $data(image).attr('src'))
-        .toArray();
+      const resourcesUrls = [
+        ...$images
+          .map((_, image) => $data(image).attr('src'))
+          .toArray()
+          .map((url) => ({ type: 'img', url })),
+        ...$scripts
+          .map((_, image) => $data(image).attr('src'))
+          .toArray()
+          .map((url) => ({ type: 'script', url })),
+      ];
 
       $images.prop('src', (_, imageUrl) => {
         const assetSrc = transformAssetUrl(pageURL, imageUrl);
@@ -37,21 +45,21 @@ const pageLoader = async (url, options = {}) => {
       });
 
       return fs.writeFile(path.join(outputDir, `${fileName}.html`), $data.html())
-        .then(() => Promise.resolve(imagesUrls));
+        .then(() => Promise.resolve(resourcesUrls));
     })
-    .then((imagesUrls) => {
+    .then((resources) => {
       const filesDirname = path.join(outputDir, `${fileName}_files`);
 
       return fs.readdir(filesDirname)
         .then(() => Promise.resolve([]), () => fs.mkdir(filesDirname))
-        .then(() => Promise.resolve(imagesUrls));
+        .then(() => Promise.resolve(resources));
     })
-    .then((imagesUrls) => Promise.allSettled(
-      imagesUrls.map((imageUrl) => axios.get(imageUrl, {
-        responseType: 'arraybuffer',
+    .then((resources) => Promise.allSettled(
+      resources.map(({ url: resourceUrl, type }) => axios.get(resourceUrl, {
+        responseType: type === 'img' ? 'arraybuffer' : '',
       })
         .then((response) => {
-          const assetSrc = transformAssetUrl(pageURL, imageUrl);
+          const assetSrc = transformAssetUrl(pageURL, resourceUrl);
 
           return fs.writeFile(path.join(outputDir, `${fileName}_files`, assetSrc), response.data);
         })),
