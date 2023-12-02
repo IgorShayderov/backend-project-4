@@ -20,8 +20,8 @@ describe('Page loader acceptance', () => {
       .get(new URL(testURL).pathname)
       .reply(200, htmlFixture);
 
-    nock('https://cdn2.hexlet.io')
-      .get('/assets/nodejs.png')
+    nock('https://test.ru')
+      .get('/assets/professions/nodejs.png')
       .reply(200, imageFixture);
 
     tmpdirPath = await fs.mkdtemp(path.join(os.tmpdir(), 'page-loader-'));
@@ -49,14 +49,30 @@ describe('Page loader acceptance', () => {
 
   test('creates images for page', async () => {
     const dir = `${tmpdirPath}/test-ru-test-file_files`;
-    const expected = 'test-ruhttps-cdn2-hexlet-io-assets-nodejs.png';
+    const expected = 'test-ruhttps-test-ru-assets-professions-nodejs.png';
 
     const result = await fs.readdir(dir);
 
     expect(result).toContain(expected);
   });
 
-  test.todo('creates links');
+  test('does not create image with different host', async () => {
+    const dir = `${tmpdirPath}/test-ru-test-file_files`;
+    const expected = 'test-ruhttps-cdn2-hexlet-io-assets-nodejs.png';
+
+    const result = await fs.readdir(dir);
+
+    expect(result).not.toContain(expected);
+  });
+
+  test.skip('creates links', async () => {
+    const dir = `${tmpdirPath}/test-ru-test-file_files`;
+    const expected = 'nodejs.png';
+
+    const result = await fs.readdir(dir);
+
+    expect(result).toContain(expected);
+  });
 
   test.todo('creates scripts');
 });

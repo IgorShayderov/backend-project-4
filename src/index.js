@@ -36,7 +36,12 @@ const pageLoader = async (sourceUrl, options = {}) => {
           .map((_, image) => $data(image).attr('src'))
           .toArray()
           .map((url) => ({ type: 'script', url })),
-      ];
+      ]
+        .filter(({ url }) => !url.startsWith('http'))
+        .map((resource) => ({
+          ...resource,
+          url: path.join(pageURL.origin, resource.url),
+        }));
 
       $images.prop('src', (_, imageUrl) => {
         const assetSrc = transformAssetUrl(pageURL, imageUrl);
@@ -55,11 +60,11 @@ const pageLoader = async (sourceUrl, options = {}) => {
         .then(() => Promise.resolve(resources));
     })
     .then((resources) => Promise.allSettled(
-      resources.map(({ url: resourceUrl, type }) => axios.get(resourceUrl, {
+      resources.map(({ url, type }) => axios.get(url, {
         responseType: type === 'img' ? 'arraybuffer' : '',
       })
         .then((response) => {
-          const assetSrc = transformAssetUrl(pageURL, resourceUrl);
+          const assetSrc = transformAssetUrl(pageURL, url);
 
           return fs.writeFile(path.join(outputDir, `${fileName}_files`, assetSrc), response.data);
         })),
