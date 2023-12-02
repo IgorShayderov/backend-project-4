@@ -55,4 +55,8 @@ describe('Page loader acceptance', () => {
 
     expect(result).toContain(expected);
   });
+
+  test.todo('creates links');
+
+  test.todo('creates scripts');
 });

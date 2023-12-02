@@ -27,10 +27,10 @@ const pageLoader = async (url, options = {}) => {
       const $images = $data('img');
 
       const imagesUrls = $images
-        .map((index, image) => $data(image).attr('src'))
+        .map((_, image) => $data(image).attr('src'))
         .toArray();
 
-      $images.prop('src', (index, imageUrl) => {
+      $images.prop('src', (_, imageUrl) => {
         const assetSrc = transformAssetUrl(pageURL, imageUrl);
 
         return path.join(outputDir, `${fileName}_files`, assetSrc);
