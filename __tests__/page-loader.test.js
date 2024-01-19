@@ -65,14 +65,12 @@ describe('Page loader acceptance', () => {
     expect(result).not.toContain(expected);
   });
 
-  test.skip('creates links', async () => {
+  test('creates links', async () => {
     const dir = `${tmpdirPath}/test-ru-test-file_files`;
-    const expected = 'nodejs.png';
+    const expected = '/courses';
 
     const result = await fs.readdir(dir);
 
     expect(result).toContain(expected);
   });
-
-  test.todo('creates scripts');
 });
