@@ -69,7 +69,7 @@ const pageLoader = async (sourceUrl, options = {}) => {
 
       const uniqueUrls = _.uniqBy(resourcesUrls, 'url');
 
-      $images.prop('src', (imageName, imageUrl) => {
+      $images.prop('src', (_, imageUrl) => {
         const assetSrc = transformAssetUrl(pageURL, imageUrl);
 
         return path.join(outputDir, `${fileName}_files`, assetSrc);
