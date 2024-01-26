@@ -1,22 +1,11 @@
-import axios from 'axios';
 import fs from 'fs/promises';
 import path from 'path';
 import * as cheerio from 'cheerio';
 import _ from 'lodash';
 import debug from 'debug';
-import axiosDebug from 'axios-debug-log';
+import { api } from './api.js';
 
-axiosDebug({
-  request(debug_, config) {
-    debug_('Request');
-  },
-  response(debug_, response) {
-    debug_('Response');
-  },
-  error(debug_, error) {
-    debug_('Error');
-  },
-});
+console.log(process.env.DEBUG, 'oO');
 
 const pageLoaderDebug = debug('page-loader');
 
@@ -45,8 +34,12 @@ const pageLoader = async (sourceUrl, options = {}) => {
   const fileName = tranformFilename(`${pageURL.host}${pageURL.pathname}`);
   const outputDir = options.output ?? process.cwd();
 
-  return axios.get(pageURL)
+  pageLoaderDebug('Loading the page');
+
+  return api.get(pageURL)
     .then(({ data }) => {
+      pageLoaderDebug('Page has been loaded');
+
       const $data = cheerio.load(data);
       const $images = $data('img');
       const $scripts = $data('script');
@@ -93,11 +86,12 @@ const pageLoader = async (sourceUrl, options = {}) => {
         return path.join(outputDir, `${fileName}_files`, assetSrc);
       });
 
+      pageLoaderDebug('Writing changed file');
+
       return fs.writeFile(path.join(outputDir, `${fileName}.html`), $data.html())
         .then(() => Promise.resolve(uniqueUrls));
     })
     .then((resources) => {
-      pageLoaderDebug('Has urls');
       const filesDirname = path.join(outputDir, `${fileName}_files`);
 
       return fs.readdir(filesDirname)
@@ -108,10 +102,14 @@ const pageLoader = async (sourceUrl, options = {}) => {
 
           return Promise.resolve();
         })
-        .then(() => Promise.resolve(resources));
+        .then(() => {
+          pageLoaderDebug('Loading resources');
+
+          return Promise.resolve(resources);
+        });
     })
     .then((resources) => Promise.all(
-      resources.map(({ url, type }) => axios.get(url, {
+      resources.map(({ url, type }) => api.get(url, {
         responseType: getResponseType(type),
       })
         .then((response) => {
@@ -122,12 +120,13 @@ const pageLoader = async (sourceUrl, options = {}) => {
           return fs.writeFile(path.join(outputDir, `${fileName}_files`, assetSrc), data);
         })
         .catch((e) => {
-          console.log('Request failed', url, e.request?.res.statusCode ?? e);
+          console.log('Request failed', url, e.request?.res?.statusCode ?? e);
         })),
     ))
     .catch((e) => {
       console.error({ e });
-    });
+    })
+    .then(() => pageLoaderDebug('Done'));
 };
 
 export default pageLoader;

@@ -5,7 +5,7 @@
   "main": "src/index.js",
   "type": "module",
   "scripts": {
-    "test": "NODE_OPTIONS=--experimental-vm-modules jest --bail",
+    "test": "DEBUG=nock.* NODE_OPTIONS=--experimental-vm-modules jest --bail",
     "test-coverage": "npm run test -- --coverage",
     "lint": "eslint ."
   },
@@ -20,6 +20,7 @@
     "cheerio": "^1.0.0-rc.12",
     "commander": "^11.1.0",
     "debug": "^4.3.4",
+    "dotenv": "^16.4.1",
     "lodash": "^4.17.21"
   },
   "devDependencies": {
