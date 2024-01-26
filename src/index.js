@@ -3,6 +3,22 @@ import fs from 'fs/promises';
 import path from 'path';
 import * as cheerio from 'cheerio';
 import _ from 'lodash';
+import debug from 'debug';
+import axiosDebug from 'axios-debug-log';
+
+axiosDebug({
+  request(debug_, config) {
+    debug_('Request');
+  },
+  response(debug_, response) {
+    debug_('Response');
+  },
+  error(debug_, error) {
+    debug_('Error');
+  },
+});
+
+const pageLoaderDebug = debug('page-loader');
 
 const getResponseType = (resourceType) => {
   switch (resourceType) {
@@ -23,6 +39,8 @@ const transformAssetUrl = (pageURL, assetUrl) => {
 };
 
 const pageLoader = async (sourceUrl, options = {}) => {
+  pageLoaderDebug('Started app');
+
   const pageURL = new URL(sourceUrl);
   const fileName = tranformFilename(`${pageURL.host}${pageURL.pathname}`);
   const outputDir = options.output ?? process.cwd();
@@ -79,6 +97,7 @@ const pageLoader = async (sourceUrl, options = {}) => {
         .then(() => Promise.resolve(uniqueUrls));
     })
     .then((resources) => {
+      pageLoaderDebug('Has urls');
       const filesDirname = path.join(outputDir, `${fileName}_files`);
 
       return fs.readdir(filesDirname)
