@@ -25,3 +25,7 @@ Now you can use utility!
 #### Example
 
 [![asciicast](https://asciinema.org/a/RlYXJ7ogXos3EEVHLVBVKy12z.svg)](https://asciinema.org/a/RlYXJ7ogXos3EEVHLVBVKy12z)
+
+#### With logs
+
+[![asciicast](https://asciinema.org/a/EeWujj5VSJuqV254ZXR2ReNZ3.svg)](https://asciinema.org/a/EeWujj5VSJuqV254ZXR2ReNZ3)

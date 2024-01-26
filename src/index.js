@@ -5,8 +5,6 @@ import _ from 'lodash';
 import debug from 'debug';
 import { api } from './api.js';
 
-console.log(process.env.DEBUG, 'oO');
-
 const pageLoaderDebug = debug('page-loader');
 
 const getResponseType = (resourceType) => {
