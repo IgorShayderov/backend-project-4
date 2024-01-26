@@ -24,6 +24,14 @@ describe('Page loader acceptance', () => {
       .get('/assets/professions/nodejs.png')
       .reply(200, imageFixture);
 
+    nock('https://test.ru')
+      .get('/assets/application.css')
+      .reply(200, '');
+
+    nock('https://test.ru')
+      .get('/courses')
+      .reply(200, '');
+
     tmpdirPath = await fs.mkdtemp(path.join(os.tmpdir(), 'page-loader-'));
 
     await pageLoader(testURL, {
@@ -67,7 +75,7 @@ describe('Page loader acceptance', () => {
 
   test('creates links', async () => {
     const dir = `${tmpdirPath}/test-ru-test-file_files`;
-    const expected = '/courses';
+    const expected = 'test-ruhttps-test-ru-assets-application.css';
 
     const result = await fs.readdir(dir);
 
