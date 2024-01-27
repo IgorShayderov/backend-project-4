@@ -1,5 +1,5 @@
 {
-  "name": "@hexlet/codegi",
+  "name": "@hexlet/code",
   "version": "1.0.0",
   "description": "Page loader utility",
   "main": "src/index.js",
