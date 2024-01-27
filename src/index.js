@@ -30,7 +30,7 @@ const pageLoader = async (sourceUrl, options = {}) => {
 
   const pageURL = new URL(sourceUrl);
   const fileName = tranformFilename(`${pageURL.host}${pageURL.pathname}`);
-  const outputDir = options.output ?? process.cwd();
+  const outputDir = options.output ? path.resolve(process.cwd(), options.output) : process.cwd();
 
   pageLoaderDebug('Loading the page');
 
@@ -86,8 +86,14 @@ const pageLoader = async (sourceUrl, options = {}) => {
 
       pageLoaderDebug('Writing changed file');
 
+      fs.stat(outputDir);
+
       return fs.writeFile(path.join(outputDir, `${fileName}.html`), $data.html())
-        .then(() => Promise.resolve(uniqueUrls));
+        .then(() => Promise.resolve(uniqueUrls))
+        .catch(() => {
+          console.error(`Directory does not exist - ${outputDir}`);
+          process.exit(10);
+        });
     })
     .then((resources) => {
       const filesDirname = path.join(outputDir, `${fileName}_files`);
@@ -119,12 +125,17 @@ const pageLoader = async (sourceUrl, options = {}) => {
         })
         .catch((e) => {
           console.log('Request failed', url, e.request?.res?.statusCode ?? e);
+          process.exit(8);
         })),
     ))
     .catch((e) => {
       console.error({ e });
+      process.exit(20);
     })
-    .then(() => pageLoaderDebug('Done'));
+    .then(() => {
+      pageLoaderDebug('Done');
+      process.exit(0);
+    });
 };
 
 export default pageLoader;
