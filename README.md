@@ -1,6 +1,6 @@
 # Page loader
 
-Page loader is simple project which allows user to simply fetch any web-page.
+Console client for fetching html resources.
 
 [![Actions Status](https://github.com/IgorShayderov/backend-project-4/actions/workflows/hexlet-check.yml/badge.svg)](https://github.com/IgorShayderov/backend-project-4/actions)
 <a href="https://codeclimate.com/github/IgorShayderov/backend-project-4/maintainability">
