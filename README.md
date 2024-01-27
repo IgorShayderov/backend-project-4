@@ -22,10 +22,16 @@ Page loader is simple project which allows user to simply fetch any web-page.
 
 Now you can use utility!
 
-#### Example
+#### Examples
+
+##### Correct work
 
 [![asciicast](https://asciinema.org/a/RlYXJ7ogXos3EEVHLVBVKy12z.svg)](https://asciinema.org/a/RlYXJ7ogXos3EEVHLVBVKy12z)
 
-#### With logs
+##### Logs
 
 [![asciicast](https://asciinema.org/a/EeWujj5VSJuqV254ZXR2ReNZ3.svg)](https://asciinema.org/a/EeWujj5VSJuqV254ZXR2ReNZ3)
+
+##### Error
+
+[![asciicast](https://asciinema.org/a/4LgB63H0EYPW7ilwOwF3v4uXS.svg)](https://asciinema.org/a/4LgB63H0EYPW7ilwOwF3v4uXS)
