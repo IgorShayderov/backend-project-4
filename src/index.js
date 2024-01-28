@@ -45,15 +45,15 @@ const pageLoader = async (sourceUrl, options = {}) => {
 
       const resourcesUrls = [
         ...$images
-          .map((_, image) => $data(image).attr('src'))
+          .map((imageIndex, image) => $data(image).attr('src'))
           .toArray()
           .map((url) => ({ type: 'img', url })),
         ...$scripts
-          .map((_, script) => $data(script).attr('src'))
+          .map((scriptIndex, script) => $data(script).attr('src'))
           .toArray()
           .map((url) => ({ type: 'script', url })),
         ...$links
-          .map((_, link) => $data(link).attr('href'))
+          .map((linkIndex, link) => $data(link).attr('href'))
           .toArray()
           .map((url) => ({ type: 'link', url })),
       ]
@@ -78,7 +78,7 @@ const pageLoader = async (sourceUrl, options = {}) => {
 
       const uniqueUrls = _.uniqBy(resourcesUrls, 'url');
 
-      $images.prop('src', (_, imageUrl) => {
+      $images.prop('src', (imgIndex, imageUrl) => {
         const assetSrc = transformAssetUrl(pageURL, imageUrl);
 
         return path.join(outputDir, `${fileName}_files`, assetSrc);
@@ -86,14 +86,8 @@ const pageLoader = async (sourceUrl, options = {}) => {
 
       pageLoaderDebug('Writing changed file');
 
-      fs.stat(outputDir);
-
       return fs.writeFile(path.join(outputDir, `${fileName}.html`), $data.html())
-        .then(() => Promise.resolve(uniqueUrls))
-        .catch(() => {
-          console.error(`Directory does not exist - ${outputDir}`);
-          process.exit(10);
-        });
+        .then(() => Promise.resolve(uniqueUrls));
     })
     .then((resources) => {
       const filesDirname = path.join(outputDir, `${fileName}_files`);
@@ -124,7 +118,7 @@ const pageLoader = async (sourceUrl, options = {}) => {
           return fs.writeFile(path.join(outputDir, `${fileName}_files`, assetSrc), data);
         })
         .catch((e) => {
-          console.log('Request failed', url, e.request?.res?.statusCode ?? e);
+          console.error('Request failed', url, e.request?.res?.statusCode ?? e);
           process.exit(8);
         })),
     ))
