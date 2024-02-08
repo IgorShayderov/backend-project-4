@@ -2,19 +2,28 @@ import nock from 'nock';
 import fs from 'fs/promises';
 import path from 'path';
 import os from 'os';
+import { jest } from '@jest/globals';
 
 import pageLoader from '../src/index.js';
 
 const pageFixturePath = './__fixtures__/test-page.html';
 const imageFixturePath = './__fixtures__/nodejs.png';
+const ccsFixturePath = './__fixtures__/application.css';
 
 describe('Page loader acceptance', () => {
   const testURL = 'https://test.ru/test-file';
   let tmpdirPath = null;
 
   beforeAll(async () => {
+    jest.spyOn(process, 'exit').mockImplementation(() => { });
+  });
+
+  beforeEach(async () => {
     const htmlFixture = await fs.readFile(pageFixturePath);
     const imageFixture = await fs.readFile(imageFixturePath);
+    const cssFixture = await fs.readFile(ccsFixturePath);
+
+    tmpdirPath = await fs.mkdtemp(path.join(os.tmpdir(), 'page-loader-'));
 
     nock(new URL(testURL).origin)
       .get(new URL(testURL).pathname)
@@ -26,59 +35,96 @@ describe('Page loader acceptance', () => {
 
     nock('https://test.ru')
       .get('/assets/application.css')
-      .reply(200, '');
+      .reply(200, cssFixture);
 
     nock('https://test.ru')
       .get('/courses')
-      .reply(200, '');
-
-    tmpdirPath = await fs.mkdtemp(path.join(os.tmpdir(), 'page-loader-'));
+      .reply(200, htmlFixture);
 
     await pageLoader(testURL, {
       output: tmpdirPath,
     });
   });
 
-  test('loads html page', async () => {
-    const expected = 'test-ru-test-file.html';
+  afterEach(async () => {
+    await fs.rmdir(tmpdirPath, {
+      recursive: true, force: true,
+    });
+    tmpdirPath = null;
 
-    const result = await fs.readdir(tmpdirPath);
-
-    expect(result).toContain(expected);
+    jest.clearAllMocks();
   });
 
-  test('has directory for resources', async () => {
-    const expected = 'test-ru-test-file_files';
+  describe('successful app run', () => {
+    test('loads html page', async () => {
+      const expected = 'test-ru-test-file.html';
 
-    const result = await fs.readdir(tmpdirPath);
+      const result = await fs.readdir(tmpdirPath);
 
-    expect(result).toContain(expected);
+      expect(result).toContain(expected);
+    });
+
+    test('has directory for resources', async () => {
+      const expected = 'test-ru-test-file_files';
+
+      const result = await fs.readdir(tmpdirPath);
+
+      expect(result).toContain(expected);
+    });
+
+    test('creates images for page', async () => {
+      const dir = `${tmpdirPath}/test-ru-test-file_files`;
+      const expected = 'test-ruhttps-test-ru-assets-professions-nodejs.png';
+
+      const result = await fs.readdir(dir);
+
+      expect(result).toContain(expected);
+    });
+
+    test('does not create image with different host', async () => {
+      const dir = `${tmpdirPath}/test-ru-test-file_files`;
+      const expected = 'test-ruhttps-cdn2-hexlet-io-assets-nodejs.png';
+
+      const result = await fs.readdir(dir);
+
+      expect(result).not.toContain(expected);
+    });
+
+    test('creates links', async () => {
+      const dir = `${tmpdirPath}/test-ru-test-file_files`;
+      const expected = 'test-ruhttps-test-ru-assets-application.css';
+
+      const result = await fs.readdir(dir);
+
+      expect(result).toContain(expected);
+    });
   });
 
-  test('creates images for page', async () => {
-    const dir = `${tmpdirPath}/test-ru-test-file_files`;
-    const expected = 'test-ruhttps-test-ru-assets-professions-nodejs.png';
+  describe('errors', () => {
+    const consoleErrorMock = jest.spyOn(console, 'error');
 
-    const result = await fs.readdir(dir);
+    test('wrong url', async () => {
+      const wrongURL = 'https://wrong';
 
-    expect(result).toContain(expected);
-  });
+      nock(new URL(wrongURL).origin)
+        .get(new URL(wrongURL).pathname)
+        .reply(500);
 
-  test('does not create image with different host', async () => {
-    const dir = `${tmpdirPath}/test-ru-test-file_files`;
-    const expected = 'test-ruhttps-cdn2-hexlet-io-assets-nodejs.png';
+      await pageLoader(wrongURL, {
+        output: tmpdirPath,
+      });
 
-    const result = await fs.readdir(dir);
+      expect(consoleErrorMock).toHaveBeenCalled();
+    });
 
-    expect(result).not.toContain(expected);
-  });
+    test('directory does not exist', async () => {
+      const wrongDir = '/non-existing-dir';
 
-  test('creates links', async () => {
-    const dir = `${tmpdirPath}/test-ru-test-file_files`;
-    const expected = 'test-ruhttps-test-ru-assets-application.css';
+      await pageLoader(testURL, {
+        output: wrongDir,
+      });
 
-    const result = await fs.readdir(dir);
-
-    expect(result).toContain(expected);
+      expect(consoleErrorMock).toHaveBeenCalled();
+    });
   });
 });

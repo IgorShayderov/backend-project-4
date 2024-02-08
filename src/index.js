@@ -123,7 +123,7 @@ const pageLoader = async (sourceUrl, options = {}) => {
         })),
     ))
     .catch((e) => {
-      console.error({ e });
+      console.error(e.cause?.reason ?? e);
       process.exit(20);
     })
     .then(() => {

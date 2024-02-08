@@ -5,7 +5,8 @@
   "main": "src/index.js",
   "type": "module",
   "scripts": {
-    "test": "DEBUG=nock.* NODE_OPTIONS=--experimental-vm-modules jest --bail",
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest --bail",
+    "test-debug": "DEBUG=nock.* npm run test",
     "test-coverage": "npm run test -- --coverage",
     "lint": "eslint ."
   },
@@ -25,6 +26,7 @@
     "lodash": "^4.17.21"
   },
   "devDependencies": {
+    "@jest/globals": "^29.7.0",
     "eslint": "^8.52.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-plugin-import": "^2.29.0",
