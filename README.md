@@ -3,6 +3,7 @@
 Console client for fetching html resources.
 
 [![Actions Status](https://github.com/IgorShayderov/backend-project-4/actions/workflows/hexlet-check.yml/badge.svg)](https://github.com/IgorShayderov/backend-project-4/actions)
+![Project check](https://github.com/IgorShayderov/backend-project-4/actions/workflows/project-check.yml/badge.svg)
 <a href="https://codeclimate.com/github/IgorShayderov/backend-project-4/maintainability">
 <img src="https://api.codeclimate.com/v1/badges/9c7b871ec32e0474534b/maintainability" />
 </a>
